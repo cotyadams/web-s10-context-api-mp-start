@@ -1,6 +1,7 @@
-import React, { useReducer } from 'react'
+import React, { useReducer, useContext} from 'react'
 import Quotes from './Quotes'
 import QuoteForm from './QuoteForm'
+import { quotesContext } from '../context/quotesContext';
 
 const CREATE_QUOTE = 'CREATE_QUOTE'
 const DELETE_QUOTE = 'DELETE_QUOTE'
@@ -8,32 +9,7 @@ const EDIT_QUOTE_AUTHENTICITY = 'EDIT_QUOTE_AUTHENTICITY'
 const SET_HIGHLIGHTED_QUOTE = 'SET_HIGHLIGHTED_QUOTE'
 const TOGGLE_VISIBILITY = 'TOGGLE_VISIBILITY'
 
-let id = 1
-const getNextId = () => id++
-const initialState = {
-  displayAllQuotes: true,
-  highlightedQuote: null,
-  quotes: [
-    {
-      id: getNextId(),
-      quoteText: "Don't cry because it's over, smile because it happened.",
-      authorName: "Dr. Seuss",
-      apocryphal: false,
-    },
-    {
-      id: getNextId(),
-      quoteText: "So many books, so little time.",
-      authorName: "Frank Zappa",
-      apocryphal: false,
-    },
-    {
-      id: getNextId(),
-      quoteText: "Be yourself; everyone else is already taken.",
-      authorName: "Oscar Wilde",
-      apocryphal: false,
-    },
-  ],
-}
+
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -64,10 +40,9 @@ const reducer = (state, action) => {
 }
 
 export default function App() {
-  const [state, dispatch] = useReducer(reducer, initialState)
-
+  const [state, dispatch] = useReducer(reducer, useContext(quotesContext))
   const createQuote = ({ authorName, quoteText }) => {
-    const newQuote = { id: getNextId(), authorName, quoteText, apocryphal: false }
+    const newQuote = { id: state.getNextId, authorName, quoteText, apocryphal: false }
     dispatch({ type: CREATE_QUOTE, payload: newQuote })
   }
   const deleteQuote = id => {
@@ -85,18 +60,20 @@ export default function App() {
   return (
     <div id="mp">
       <h2>Module Project</h2>
-      <Quotes
-        deleteQuote={deleteQuote}
-        editQuoteAuthenticity={editQuoteAuthenticity}
-        setHighlightedQuote={setHighlightedQuote}
-        toggleVisibility={toggleVisibility}
-        displayAllQuotes={state.displayAllQuotes}
-        highlightedQuote={state.highlightedQuote}
-        quotes={state.quotes}
-      />
-      <QuoteForm
-        createQuote={createQuote}
-      />
+      <quotesContext.Provider value={state}>
+        <Quotes
+          deleteQuote={deleteQuote}
+          editQuoteAuthenticity={editQuoteAuthenticity}
+          setHighlightedQuote={setHighlightedQuote}
+          toggleVisibility={toggleVisibility}
+          displayAllQuotes={state.displayAllQuotes}
+          highlightedQuote={state.highlightedQuote}
+          quotes={state.quotes}
+        />
+        <QuoteForm
+          createQuote={createQuote}
+        />
+      </quotesContext.Provider>
     </div>
   )
 }
